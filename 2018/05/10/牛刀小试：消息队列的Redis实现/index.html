@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+<meta name="description" content="最近闲着没事把博客的域名弄好了，大家以后可以直接通过http://wsghawk.com 来访问我的博客；还加上了畅言评论系统，有什么问题可以直接在评论里提（不知道为啥备案号一直过不了审，所以还是试用版本，难受）。　　掐指一算，已经有一个多月没有更新博客了。一方面是因为最近在忙其他的事情，没时间（虽然这个“其他的事情”也没做好）；另一方面是感觉之前写的东西并没有帮到很多人，这让我……很犹豫。不">
+<meta property="og:type" content="article">
+<meta property="og:title" content="牛刀小试：消息队列的Redis实现">
+<meta property="og:url" content="http://yoursite.com/2018/05/10/牛刀小试：消息队列的Redis实现/index.html">
+<meta property="og:site_name" content="Hawk&#39;s Repository">
+<meta property="og:description" content="最近闲着没事把博客的域名弄好了，大家以后可以直接通过http://wsghawk.com 来访问我的博客；还加上了畅言评论系统，有什么问题可以直接在评论里提（不知道为啥备案号一直过不了审，所以还是试用版本，难受）。　　掐指一算，已经有一个多月没有更新博客了。一方面是因为最近在忙其他的事情，没时间（虽然这个“其他的事情”也没做好）；另一方面是感觉之前写的东西并没有帮到很多人，这让我……很犹豫。不">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-07-06T12:04:51.897Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="牛刀小试：消息队列的Redis实现">
+<meta name="twitter:description" content="最近闲着没事把博客的域名弄好了，大家以后可以直接通过http://wsghawk.com 来访问我的博客；还加上了畅言评论系统，有什么问题可以直接在评论里提（不知道为啥备案号一直过不了审，所以还是试用版本，难受）。　　掐指一算，已经有一个多月没有更新博客了。一方面是因为最近在忙其他的事情，没时间（虽然这个“其他的事情”也没做好）；另一方面是感觉之前写的东西并没有帮到很多人，这让我……很犹豫。不">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/05/10/牛刀小试：消息队列的Redis实现/"/>
+
+
+  <title>牛刀小试：消息队列的Redis实现 | Hawk's Repository</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hawk's Repository</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">一个还行的技术博客</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/05/10/牛刀小试：消息队列的Redis实现/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hawk">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hawk's Repository">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">牛刀小试：消息队列的Redis实现</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-10T23:58:35+08:00">2018-05-10</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Redis/" itemprop="url" rel="index"><span itemprop="name">Redis</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+              <span class="post-meta-divider">|</span>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-comment-o"></i>
+              </span>
+              
+                <a href="/2018/05/10/牛刀小试：消息队列的Redis实现/#SOHUCS" itemprop="discussionUrl">
+                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2018/05/10/牛刀小试：消息队列的Redis实现/" itemprop="commentsCount"></span>
+                </a>
+              
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>　　最近闲着没事把博客的域名弄好了，大家以后可以直接通过<a href="http://wsghawk.com" target="_blank" rel="noopener">http://wsghawk.com</a> 来访问我的博客；还加上了畅言评论系统，有什么问题可以直接在评论里提（不知道为啥备案号一直过不了审，所以还是试用版本，难受）。<br>　　掐指一算，已经有一个多月没有更新博客了。一方面是因为最近在忙其他的事情，没时间（虽然这个“其他的事情”也没做好）；另一方面是感觉之前写的东西并没有帮到很多人，这让我……很犹豫。不过学技术从来都不是一蹴而就的，而是需要长时间的积累，想到这里，我觉得还是有必要继续把博客写下去。<br>　　之前写过一篇《入门消息队列》（<a href="http://wsghawk.com/2018/02/01/%E5%85%A5%E9%97%A8%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" target="_blank" rel="noopener">http://wsghawk.com/2018/02/01/%E5%85%A5%E9%97%A8%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/</a> ），结尾我说打算写一篇关于消息队列应用的文章。如今三个月过去了，觉得是时候把这个坑填上了！所以说这篇文章就来介绍一下消息队列的Redis实现。<br><a id="more"></a><br>　　在开始正式内容之前，先来回顾一下消息队列的两种模式：</p>
+<ul>
+<li>生产者消费者模式：生产者生产消息放到队列里，多个消费者同时监听队列，谁先抢到消息谁就会从队列中取走消息。即对于每个消息只能被最多一个消费者拥有。</li>
+<li>发布者订阅者模式：发布者生产消息放到队列里，多个监听队列的消费者都会收到同一份消息。即正常情况下每个消费者收到的消息应该都是一样的。  </li>
+</ul>
+<p>　　那为什么我要使用Redis作为消息队列中间件呢？大家经常听到的RabbitMQ、kafka等，多为企业级MQ产品，较为笨重。例如我们如果用RabbitMQ就必须为它搭建一个服务器，同时如果要考虑可用性，就要为服务端建立一个集群，而且在生产如果有问题也需要查找功能。在中小型业务的开发过程中，可能业务的其他整个实现都没这个重，过重的组件服务会成倍增加工作量。而Redis可以实现轻量级消息队列，适合我们平时开发使用。不过Redis设计的初衷并不是作为消息队列来使用，只是因为它的一些操作恰好可以实现上述的两种消息队列模式，实际性能与专业的消息队列产品肯定是有差距的。<br>　　说到Redis，五一三天精读了《Redis开发与运维》和《Redis实战》两本书（其实还有本《Redis设计与实现》，不过涉及的知识过于底层，没能读下去……），对Redis有了进一步的了解。它的效率之高，是MySQL这类传统关系型数据库无法比拟的。虽然对很多人来说，Redis还是一个新名词，但我觉得对于后台开发人员来说，Redis与MySQL一样，都是必须要掌握的。<br>　　这里我主要讲一下如何使用Redis实现消息队列的生产者消费者模式。该模式依赖于Redis的列表数据结构与lpush、brpop操作。大家都知道，lpush、lpop和rpush、rpop是在列表两端进行插入和弹出操作，而blpop和brpop是lpop和rpop的阻塞版本。简单解释一下，拿blpop来说，当列表内没有任何元素可供弹出的时候，blpop并不会像lpop一样立即返回一个空值，而是会将连接阻塞，直到等待超时或发现可弹出元素为止。将lpush与brpop操作结合到一起，就得到一个阻塞队列啦~<br>　　这里我主要结合最近项目中的一个业务来举例子：当用户点赞或评论其他用户的动态时，被点赞或评论的用户需要收到一条相关私信。我们在点赞时，其实主要关心这个赞是不是点上了，至于被点赞用户是否收到了相关私信，并不是那么重要（毕竟自己看不到），所以这个业务非常适合使用消息队列进行异步处理。<br>　　下面就是Code Time了~在Spring Boot项目中操作Redis是相当简单的，给大家提供两种办法。一是使用Jedis客户端，首先在pom.xml文件中引入Jedis的依赖：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">	&lt;groupId&gt;redis.clients&lt;/groupId&gt;</span><br><span class="line">	&lt;artifactId&gt;jedis&lt;/artifactId&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure></p>
+<p>　　使用Jedis操作Redis的具体代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">@Service</span><br><span class="line">@Slf4j</span><br><span class="line">public class JedisAdapter implements InitializingBean &#123;</span><br><span class="line"></span><br><span class="line">    private JedisPool pool = null;</span><br><span class="line"></span><br><span class="line">    @Value(&quot;$&#123;spring.redis.host&#125;&quot;)</span><br><span class="line">    private String host;</span><br><span class="line"></span><br><span class="line">    @Value(&quot;$&#123;spring.redis.password&#125;&quot;)</span><br><span class="line">    private String password;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void afterPropertiesSet() &#123;</span><br><span class="line">        // 在初始化Bean时配置JedisPool连接池</span><br><span class="line">        if (StringUtils.isEmpty(password)) &#123;</span><br><span class="line">            pool = new JedisPool(new GenericObjectPoolConfig(), &quot;localhost&quot;, 6379, 2000, null);</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            pool = new JedisPool(new GenericObjectPoolConfig(), host, 6379, 2000, password);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    public void lpush(String key, String value) &#123;</span><br><span class="line">        Jedis jedis = null;</span><br><span class="line">        try &#123;</span><br><span class="line">            // 在JedisPool连接池中取得Jedis连接</span><br><span class="line">            jedis = pool.getResource();</span><br><span class="line">            jedis.lpush(key, value);</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            log.error(&quot;Jedis连接异常：&quot; + e.getMessage());</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            if (null != jedis) &#123;</span><br><span class="line">                jedis.close();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public List&lt;String&gt; brpop(int timeout, String key) &#123;</span><br><span class="line">        Jedis jedis = null;</span><br><span class="line">        try &#123;</span><br><span class="line">            jedis = pool.getResource();</span><br><span class="line">            return jedis.brpop(timeout, key);</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            log.error(&quot;Jedis连接异常：&quot; + e.getMessage());</span><br><span class="line">            return null;</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            if (null != jedis) &#123;</span><br><span class="line">                jedis.close();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>　　之前我提到过，从Spring Boot 2.0开始，默认的Redis客户端换成了Lettuce，所以再用上面那种方法，稍微有点不讲究。在引入spring-boot-starter-data-redis依赖后，其实Spring Boot就已将帮我们配置好了用于操作Redis的RedisTemplate和StringRedisTemplate，可以直接拿来使用：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">@Service</span><br><span class="line">public class RedisService &#123;</span><br><span class="line"></span><br><span class="line">    @Resource</span><br><span class="line">    private StringRedisTemplate stringRedisTemplate;</span><br><span class="line">    </span><br><span class="line">    public void lpush(String key, String value) &#123;</span><br><span class="line">        stringRedisTemplate.opsForList().leftPush(key, value);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public String brpop(long timeout, String key) &#123;</span><br><span class="line">        return stringRedisTemplate.opsForList().rightPop(key, timeout, TimeUnit.SECONDS);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>　　既然消息队列是使用Redis的链表实现的，那链表里需要放些什么呢？这就需要有一个事件类来表示添加到消息队列中的各种事件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line">@NoArgsConstructor</span><br><span class="line">@AllArgsConstructor</span><br><span class="line">public class EventModel &#123;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 事件类型，用EventType枚举类表示，这里指该事件属于点赞还是评论</span><br><span class="line">     */</span><br><span class="line">    @Getter</span><br><span class="line">    private EventType eventType;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 触发该事件的用户id，这里指进行点赞或评论操作的用户id</span><br><span class="line">     */</span><br><span class="line">    @Getter</span><br><span class="line">    private Long actorId;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 被点赞或评论的对象类型，1为动态，2为评论</span><br><span class="line">     */</span><br><span class="line">    @Getter</span><br><span class="line">    private Integer entityType;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 被点赞或评论的对象id</span><br><span class="line">     */</span><br><span class="line">    @Getter</span><br><span class="line">    private Long entityId;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 被点赞或评论对象的拥有者id，即将要收到私信的用户id</span><br><span class="line">     */</span><br><span class="line">    @Getter</span><br><span class="line">    private Long entityOwnerId;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 用于保存该事件的一些附加信息</span><br><span class="line">     */</span><br><span class="line">    private Map&lt;String, String&gt; exts = new HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    public EventModel setEventType(EventType eventType) &#123;</span><br><span class="line">        this.eventType = eventType;</span><br><span class="line">        return this;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public EventModel setActorId(Long actorId) &#123;</span><br><span class="line">        this.actorId = actorId;</span><br><span class="line">        return this;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public EventModel setEntityType(Integer entityType) &#123;</span><br><span class="line">        this.entityType = entityType;</span><br><span class="line">        return this;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public EventModel setEntityId(Long entityId) &#123;</span><br><span class="line">        this.entityId = entityId;</span><br><span class="line">        return this;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public EventModel setEntityOwnerId(Long entityOwnerId) &#123;</span><br><span class="line">        this.entityOwnerId = entityOwnerId;</span><br><span class="line">        return this;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public Map&lt;String, String&gt; getExt() &#123;</span><br><span class="line">        return this.exts;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public EventModel setExt(String key, String value) &#123;</span><br><span class="line">        exts.put(key, value);</span><br><span class="line">        return this;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">public enum EventType &#123;</span><br><span class="line"></span><br><span class="line">    LIKE(1),</span><br><span class="line">    </span><br><span class="line">    COMMENT(2);</span><br><span class="line"></span><br><span class="line">    private int value;</span><br><span class="line"></span><br><span class="line">    EventType(int value) &#123;</span><br><span class="line">        this.value = value;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public int getValue() &#123;</span><br><span class="line">        return value;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>　　其次，我们需要对消息队列中的事件进行处理，先定义一个通用接口：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">public interface EventHandler &#123;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 进行具体处理操作的方法</span><br><span class="line">     *</span><br><span class="line">     * @param eventModel</span><br><span class="line">     */</span><br><span class="line">    void doHandle(EventModel eventModel);</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 返回该处理类支持的事件类型</span><br><span class="line">     *</span><br><span class="line">     * @return</span><br><span class="line">     */</span><br><span class="line">    List&lt;EventType&gt; getSupportEventTypes();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>　　下面是该接口的实现类，主要用于处理点赞和评论事件，大家可以举一反三，写出用于处理其他事件的实现类，如发送邮件事件等：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">@Service</span><br><span class="line">public class MessageHandler implements EventHandler &#123;</span><br><span class="line"></span><br><span class="line">    @Resource</span><br><span class="line">    private MessageService messageService;</span><br><span class="line"></span><br><span class="line">    @Resource</span><br><span class="line">    private NewsService newsService;</span><br><span class="line"></span><br><span class="line">    @Resource</span><br><span class="line">    private CommentService commentService;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void doHandle(EventModel eventModel) &#123;</span><br><span class="line">        Message message = new Message();</span><br><span class="line">        message.setFromId(eventModel.getActorId());</span><br><span class="line">        message.setToId(eventModel.getEntityOwnerId());</span><br><span class="line">        if (eventModel.getEventType().equals(EventType.LIKE)) &#123;</span><br><span class="line">            if (eventModel.getEntityType() == EntityType.ENTITY_NEWS) &#123;</span><br><span class="line">                News news = newsService.findOne(eventModel.getEntityId());</span><br><span class="line">                // 在私信中，动态只展示前两个字</span><br><span class="line">                message.setContent(&quot;赞了您的动态“&quot; + news.getContent().substring(0, 2) + &quot; ...”&quot;);</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                Comment comment = commentService.findOne(eventModel.getEntityId());</span><br><span class="line">                // 在私信中，评论展示全部内容</span><br><span class="line">                message.setContent(&quot;赞了您的评论“&quot; + comment.getContent() + &quot;”&quot;);</span><br><span class="line">            &#125;</span><br><span class="line">            message.setMessageType(MessageType.MESSAGE_LIKE);</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            // 该事件为评论事件</span><br><span class="line">            News news = newsService.findOne(eventModel.getEntityId());</span><br><span class="line">            // 在私信中，动态只展示前两个字</span><br><span class="line">            message.setContent(&quot;评论了您的动态“&quot; + news.getContent().substring(0, 2) + &quot; ...”：&quot;</span><br><span class="line">                    + eventModel.getExt().get(&quot;content&quot;));</span><br><span class="line">            message.setMessageType(MessageType.MESSAGE_COMMIT);</span><br><span class="line">        &#125;</span><br><span class="line">        messageService.save(message);</span><br><span class="line">        // 使用GoEasy推送私信</span><br><span class="line">        GoEasy goEasy = new GoEasy(&quot;https://rest-hangzhou.goeasy.io&quot;, SystemUtil.COMMON_KEY);</span><br><span class="line">        String messageStatus = JSONObject.toJSONString(messageService.getMessageStatus(eventModel.getEntityOwnerId()));</span><br><span class="line">        goEasy.publish(eventModel.getEntityOwnerId().toString(), messageStatus);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public List&lt;EventType&gt; getSupportEventTypes() &#123;</span><br><span class="line">        return Arrays.asList(EventType.LIKE, EventType.COMMENT);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p> 　　最后就是消息队列的Producer和Consumer了，Producer比较简单，只需要将事件对象序列化并插入到Redis链表中即可：<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">@Service</span><br><span class="line">public class EventProducer &#123;</span><br><span class="line"></span><br><span class="line">    @Resource</span><br><span class="line">    private JedisAdapter jedisAdapter;</span><br><span class="line"></span><br><span class="line">    public void fireEvent(EventModel eventModel) &#123;</span><br><span class="line">        String eventModelJson = JSONObject.toJSONString(eventModel);</span><br><span class="line">        String eventQueueKey = RedisKeyUtil.getEventQueueKey();</span><br><span class="line">        jedisAdapter.lpush(eventQueueKey, eventModelJson);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p> 　　而Consumer写起来较难，除了将事件对象从Redis链表中弹出，还需要将这些事件路由到不同的Handler进行处理，大家可以参考一下我的写法：<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">@Slf4j</span><br><span class="line">@Service</span><br><span class="line">public class EventConsumer implements InitializingBean, ApplicationContextAware &#123;</span><br><span class="line"></span><br><span class="line">    // 针对每个事件，都有一组Handler进行处理，使用该成员变量存储它们的对应关系</span><br><span class="line">    private Map&lt;EventType, List&lt;EventHandler&gt;&gt; config = new HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    private ApplicationContext applicationContext;</span><br><span class="line"></span><br><span class="line">    private static ExecutorService executor = Executors.newCachedThreadPool();</span><br><span class="line"></span><br><span class="line">    @Resource</span><br><span class="line">    private JedisAdapter jedisAdapter;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 初始化bean时的操作</span><br><span class="line">     *</span><br><span class="line">     * @throws Exception</span><br><span class="line">     */</span><br><span class="line">    @Override</span><br><span class="line">    public void afterPropertiesSet() throws Exception &#123;</span><br><span class="line">        // 获得所有EventHandler接口的实现类</span><br><span class="line">        Map&lt;String, EventHandler&gt; beans = applicationContext.getBeansOfType(EventHandler.class);</span><br><span class="line">        // 遍历这些实现类，根据它们的getSupportEventTypes()方法为config成员变量赋值</span><br><span class="line">        for (Map.Entry&lt;String, EventHandler&gt; entry : beans.entrySet()) &#123;</span><br><span class="line">            List&lt;EventType&gt; eventTypeList = entry.getValue().getSupportEventTypes();</span><br><span class="line">            for (EventType eventType : eventTypeList) &#123;</span><br><span class="line">                if (!config.containsKey(eventType)) &#123;</span><br><span class="line">                    config.put(eventType, new ArrayList&lt;&gt;());</span><br><span class="line">                &#125;</span><br><span class="line">                config.get(eventType).add(entry.getValue());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        // 另起一个线程，用于将事件对象从Redis链表中弹出并路由到不同的Handler进行处理</span><br><span class="line">        executor.execute(() -&gt; &#123;</span><br><span class="line">                while (true) &#123;</span><br><span class="line">                    String eventQueueKey = RedisKeyUtil.getEventQueueKey();</span><br><span class="line">                    // 阻塞时间设为0，表示若链表为空将一直阻塞下去</span><br><span class="line">                    List&lt;String&gt; events = jedisAdapter.brpop(0, eventQueueKey);</span><br><span class="line">                    for (String event : events) &#123;</span><br><span class="line">                        if (event.equals(eventQueueKey)) &#123;</span><br><span class="line">                            continue;</span><br><span class="line">                        &#125;</span><br><span class="line">                        EventModel eventModel = JSONObject.parseObject(event, EventModel.class);</span><br><span class="line">                        if (!config.containsKey(eventModel.getEventType())) &#123;</span><br><span class="line">                            log.error(&quot;事件无法识别！&quot;);</span><br><span class="line">                            continue;</span><br><span class="line">                        &#125;</span><br><span class="line">                        for (EventHandler eventHandler : config.get(eventModel.getEventType())) &#123;</span><br><span class="line">                            eventHandler.doHandle(eventModel);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException &#123;</span><br><span class="line">        this.applicationContext = applicationContext;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>　　关于消息队列的部分就写完啦~下面是如何使用它，以点赞为例：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">@Service</span><br><span class="line">public class LikeService &#123;</span><br><span class="line"></span><br><span class="line">    @Resource</span><br><span class="line">    private NewsService newsService;</span><br><span class="line"></span><br><span class="line">    @Resource</span><br><span class="line">    private CommentService commentService;</span><br><span class="line"></span><br><span class="line">    @Resource</span><br><span class="line">    private JedisAdapter jedisAdapter;</span><br><span class="line"></span><br><span class="line">    @Resource</span><br><span class="line">    private EventProducer eventProducer;</span><br><span class="line">    </span><br><span class="line">    public long like(int entityType, Long entityId) &#123;</span><br><span class="line">        String likeKey = RedisKeyUtil.getLikeKey(entityType, entityId);</span><br><span class="line">        String dislikeKey = RedisKeyUtil.getDislikeKey(entityType, entityId);</span><br><span class="line">        Long userId = UserContextHolder.get().getId();</span><br><span class="line">        jedisAdapter.sadd(likeKey, String.valueOf(userId));</span><br><span class="line">        // 如果首次点赞，需要给被点赞用户发消息</span><br><span class="line">        if (!jedisAdapter.sismember(dislikeKey, String.valueOf(userId))) &#123;</span><br><span class="line">            // 另起一个线程，构造点赞事件对象并调用EventProducer的fireEvent()方法将该事件对象插入到消息队列中</span><br><span class="line">            executor.execute(() -&gt; &#123;</span><br><span class="line">                if (entityType == EntityType.ENTITY_NEWS) &#123;</span><br><span class="line">                    News news = newsService.findOne(entityId);</span><br><span class="line">                    if (!userId.equals(news.getUserId())) &#123;</span><br><span class="line">                        eventProducer.fireEvent(new EventModel().setEventType(EventType.LIKE)</span><br><span class="line">                                .setActorId(userId).setEntityType(EntityType.ENTITY_NEWS)</span><br><span class="line">                                .setEntityId(entityId).setEntityOwnerId(news.getUserId())</span><br><span class="line">                        );</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; else &#123;</span><br><span class="line">                    // 点赞对象为评论</span><br><span class="line">                    Comment comment = commentService.findOne(entityId);</span><br><span class="line">                    if (!userId.equals(comment.getUserId())) &#123;</span><br><span class="line">                        eventProducer.fireEvent(new EventModel().setEventType(EventType.LIKE)</span><br><span class="line">                                .setActorId(userId).setEntityType(EntityType.ENTITY_COMMENT)</span><br><span class="line">                                .setEntityId(entityId).setEntityOwnerId(comment.getUserId()));</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            jedisAdapter.srem(dislikeKey, String.valueOf(userId));</span><br><span class="line">        &#125;</span><br><span class="line">        return jedisAdapter.scard(likeKey);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>　　这样差不多就算写完了，希望能给大家看完能有所启发，对我写的代码进行变换、改进，最终应用到自己的项目中！</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/30/入门SpringBoot/" rel="next" title="零基础五分钟入门Spring Boot">
+                <i class="fa fa-chevron-left"></i> 零基础五分钟入门Spring Boot
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/06/03/Autowired的正确用法/" rel="prev" title="@Autowired的正确用法">
+                @Autowired的正确用法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="SOHUCS"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Hawk" />
+            
+              <p class="site-author-name" itemprop="name">Hawk</p>
+              <p class="site-description motion-element" itemprop="description">Don't ruin a good today by thinking about a bad yesterday.</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/HAWK97" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:wsghawk97@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-globe"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Hawk</span>
+
+  
+
+  
+</div>
+<div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+        本站访客数<span id="busuanzi_value_site_uv"></span>人
+</span>
+</div>
+&nbsp&nbsp|&nbsp&nbsp
+<div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_pv">
+	本站总访问量<span id="busuanzi_value_site_pv"></span>次
+</span>
+</div>
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Muse</a> v6.0.1</div>
+
+-->
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+  
+    <script type="text/javascript">
+    (function(){
+      var appid = 'cytBwQz5R';
+      var conf = '45a7b97bccc404fc874e95464b33b9a5';
+      var width = window.innerWidth || document.documentElement.clientWidth;
+      if (width < 960) {
+      window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){
+        window.changyan.api.config({appid:appid,conf:conf})});
+      }
+    })();
+    </script>
+    <script type="text/javascript" src="https://assets.changyan.sohu.com/upload/plugins/plugins.count.js"></script>
+  
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+<meta name="description" content="首先要说，这篇文章是写给从没接触过Java Web后端框架的人看的，如果之前有过使用后端框架开发项目的经验，看到这里就可以把页面关掉了。其次，标题上的“五分钟入门”是我口胡的，五分钟大概能读完这篇文章，真正会用Spring Boot我觉得需要一周左右的时间，而想要掌握Spring Boot则需要更多时间。最后，这篇文章是完全新手向的，我尽量把一些概念说的直白一点，如果那么直白了还是看不懂，就…">
+<meta property="og:type" content="article">
+<meta property="og:title" content="零基础五分钟入门Spring Boot">
+<meta property="og:url" content="http://yoursite.com/2018/03/30/入门SpringBoot/index.html">
+<meta property="og:site_name" content="Hawk&#39;s Repository">
+<meta property="og:description" content="首先要说，这篇文章是写给从没接触过Java Web后端框架的人看的，如果之前有过使用后端框架开发项目的经验，看到这里就可以把页面关掉了。其次，标题上的“五分钟入门”是我口胡的，五分钟大概能读完这篇文章，真正会用Spring Boot我觉得需要一周左右的时间，而想要掌握Spring Boot则需要更多时间。最后，这篇文章是完全新手向的，我尽量把一些概念说的直白一点，如果那么直白了还是看不懂，就…">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180329130205.png">
+<meta property="og:image" content="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180329130701.png">
+<meta property="og:image" content="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180329132504.png">
+<meta property="og:image" content="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330111005.png">
+<meta property="og:image" content="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330111213.png">
+<meta property="og:image" content="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330111320.png">
+<meta property="og:image" content="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330111740.png">
+<meta property="og:image" content="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330115543.png">
+<meta property="og:image" content="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330131214.png">
+<meta property="og:image" content="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330142915.png">
+<meta property="og:image" content="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330145509.png">
+<meta property="og:image" content="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330145652.png">
+<meta property="og:image" content="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330173120.png">
+<meta property="og:image" content="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330204846.png">
+<meta property="og:image" content="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330205653.png">
+<meta property="og:image" content="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330205739.png">
+<meta property="og:image" content="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330205757.png">
+<meta property="og:updated_time" content="2018-07-06T12:08:06.731Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="零基础五分钟入门Spring Boot">
+<meta name="twitter:description" content="首先要说，这篇文章是写给从没接触过Java Web后端框架的人看的，如果之前有过使用后端框架开发项目的经验，看到这里就可以把页面关掉了。其次，标题上的“五分钟入门”是我口胡的，五分钟大概能读完这篇文章，真正会用Spring Boot我觉得需要一周左右的时间，而想要掌握Spring Boot则需要更多时间。最后，这篇文章是完全新手向的，我尽量把一些概念说的直白一点，如果那么直白了还是看不懂，就…">
+<meta name="twitter:image" content="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180329130205.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/03/30/入门SpringBoot/"/>
+
+
+  <title>零基础五分钟入门Spring Boot | Hawk's Repository</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hawk's Repository</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">一个还行的技术博客</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/30/入门SpringBoot/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hawk">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hawk's Repository">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">零基础五分钟入门Spring Boot</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-30T21:54:36+08:00">2018-03-30</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/后端框架/" itemprop="url" rel="index"><span itemprop="name">后端框架</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/后端框架/Spring-Boot/" itemprop="url" rel="index"><span itemprop="name">Spring Boot</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+              <span class="post-meta-divider">|</span>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-comment-o"></i>
+              </span>
+              
+                <a href="/2018/03/30/入门SpringBoot/#SOHUCS" itemprop="discussionUrl">
+                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2018/03/30/入门SpringBoot/" itemprop="commentsCount"></span>
+                </a>
+              
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>　　首先要说，这篇文章是写给<strong>从没接触过Java Web后端框架</strong>的人看的，如果之前有过使用后端框架开发项目的经验，看到这里就可以把页面关掉了。其次，标题上的“五分钟入门”是我口胡的，五分钟大概能读完这篇文章，真正会用Spring Boot我觉得需要一周左右的时间，而想要掌握Spring Boot则需要更多时间。最后，这篇文章是完全新手向的，我尽量把一些概念说的直白一点，如果那么直白了还是看不懂，就……<br><a id="more"></a><br>　　Spring Boot，最大的特点是“开箱即用”，那么啥叫“开箱即用”呢，如果之前用过Spring，应该能很好地理解这四个字。通俗地来说，在Spring中，每增加一个组件，都需要在配置文件里写一堆关于这个组件的配置信息，非常的繁琐。而Spring Boot所谓的“开箱即用”、“自动配置”，是因为它基于“约定优先于配置”的思想，预先定义了一些默认的配置，我们几乎不需要去改变这些默认配置，这样在Spring Boot的配置文件中，只需要写一些必要的配置信息，如数据库url、数据库用户名密码等，与Spring相比大大减轻了我们在配置组件上的负担。其实，Spring Boot并不是什么全新的框架，它就像给Spring换上了一套比较好看的衣服，骨子里还是Spring那套东西，所以我觉得一上来还是先学Spring比较好。不过就算之前没学过Spring，我在下面会讲一些Spring的基本用法，还是可以看懂的。我一直觉得，框架的出现，很大程度上弱化了对语言的要求，就像vue、react等前端框架的出现弱化了对JavaScript的要求一样，所以大家不要担心因为自己Java基础不好而学不会Spring Boot。<br>　　入门Spring Boot第一步，先去下载宇宙第一Java IDE——IntelliJ IDEA（Ultimate版），并不是说Eclipse不能开发Spring Boot，但是放着宇宙第一IDE不用，那就相当于给自己找麻烦了。顺便提一句，因为Ultimate版是收费的，很多人可能想着去网上找激活码，但是本着支持正版的原则，大家可以先用学生邮箱注册一个JetBrains账号，因为学生是有一年的免费使用权的，一年之后说不定……就有钱买了（山财还是很牛逼的，竟然有学生邮箱：<a href="http://email.sdufe.edu.cn" target="_blank" rel="noopener">http://email.sdufe.edu.cn</a> ）。<br>　　在IDEA中新建一个Spring Boot项目，真的是不能更简单了。在新建项目列表中选择下面这个，然后点击Next：<br><img src="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180329130205.png" alt="图片未加载成功"><br><img src="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180329130701.png" alt="图片未加载成功"><br>　　Group为组名，Artifact为项目名，这都没什么好说的。我想说的有两个地方：Type我选的是Maven Project，也就是说项目是使用Maven构建的，也可以选择Gradle Project，两者都是现在比较常用的项目构建方式，只是我比较习惯用Maven罢了，至于Maven具体有什么用，我后面会说。其次Packaging我选的是Jar而不是大家熟悉的War，这里就体现了Spring Boot的另一个特性：<strong>内置Tomcat</strong>。我们在部署项目时，不需要打包成war并放到服务器Tomcat的webapps下运行，而只需打包成jar，像运行普通jar包一样java -jar 后加jar包名称即可，当然了部署Spring Boot项目属于进阶知识，我并不打算讲。<br><img src="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180329132504.png" alt="图片未加载成功"><br>　　然后就是选择项目所依赖的各种组件，其中Lombok不是必需的，也就是说只选后面那三个项目就可以跑起来。Lombok可以根据注解生成POJO（即只有setter/getter/toString的简单类）的构造方法、setter、getter方法等，非常方便（使用前需要对IDEA进行一些小设置，大家可以自行百度“如何在IDEA中使用Lombok”）。大家可能要说，setter、getter方法我们自己也可以手写啊，但是，只要是手写，就有很大可能会出错，而使用Lombok这样的工具可以将出错的可能性降到最低。<br>　　之后就能打开项目啦~如果是第一次创建Spring Boot项目，可能会等几分钟的时间才能把项目加载出来（根据网速，一般在五到十分钟吧），那段时间是Maven在为我们导入项目所需的依赖。Maven，往大里说，是一个项目管理工具，但我们并不需要明白它是如何进行项目管理的，只需要会使用它提供的依赖管理功能就可以了。一个完整的项目通常会依赖大量的外部组件，如果我们一个个去搜索与这些组件相关的jar包然后手动复制粘贴到项目里，工作量是巨大的，而使用Maven则会让这一过程变得非常简单。<br>　　比方说，我想用阿里开发的json序列化工具Fastjson，就要先去Maven中央仓库的网站——<a href="http://mvnrepository.com/" target="_blank" rel="noopener">http://mvnrepository.com/</a> 去搜索Fastjson，如下所示：<br><img src="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330111005.png" alt="图片未加载成功"><br><img src="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330111213.png" alt="图片未加载成功"><br><img src="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330111320.png" alt="图片未加载成功"><br>　　搜到之后，选择一个较新的或使用人数最多、较稳定的版本，把上图中选中的部分复制下来，粘贴到项目的pom.xml文件中就好啦~<br><img src="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330111740.png" alt="图片未加载成功"><br>　　记住要放到<dependencies>标签里，然后点一下右下角的Enable Auto-import就可以让Maven帮助我们导入这个依赖了。具体的工作原理是，Maven社区提供了一个中央仓库，其中包含了大量常用的库，当我们使用Maven导入依赖时，相关jar包会从Maven中央仓库下载到位于我们电脑上的本地仓库（即本机上的一个文件夹）。这样当再次使用同一个依赖时，Maven会先从本地仓库寻找，找不到再去中央仓库下载，省去了频繁下载的麻烦。<br>　　这里告诉大家一个技巧，直接从Maven的中央仓库下载依赖，因为涉及到访问外网，速度是很悲催的，推荐大家使用阿里云搭建的镜像仓库。先要找到Maven配置文件的位置，比方说我的是C:\Users\dell\.m2\settings.xml。<br><img src="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330115543.png" alt="图片未加载成功"><br>　　找到这个配置文件之后，在里面加上下面这些就可以获得一个较快的依赖下载速度了：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;mirrors&gt;</span><br><span class="line">    &lt;mirror&gt;</span><br><span class="line">        &lt;id&gt;alimaven&lt;/id&gt;</span><br><span class="line">        &lt;name&gt;aliyun maven&lt;/name&gt;</span><br><span class="line">        &lt;url&gt;http://maven.aliyun.com/nexus/content/groups/public/&lt;/url&gt;</span><br><span class="line">        &lt;mirrorOf&gt;central&lt;/mirrorOf&gt;</span><br><span class="line">    &lt;/mirror&gt;</span><br><span class="line">&lt;/mirrors&gt;</span><br></pre></td></tr></table></figure></dependencies></p>
+<p>　　写了差不多五六千字，终于可以开始配置Spring Boot了……首先先在resources文件夹下新建下面这两个文件：<br><img src="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330131214.png" alt="图片未加载成功"><br>　　项目的开发环境和最终上线环境肯定是不一样的，不能都写在同一个配置文件里。如果你想采用开发环境的配置，就在application.properties里写上：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">spring.profiles.active=dev</span><br></pre></td></tr></table></figure></p>
+<p>　　同理，当项目上线时，把dev改成prod即可。<br>　　下面在application-dev.properties里写一下项目必需的配置信息：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"># Spring Boot内置Tomcat的端口号，可以自定义，默认为8080</span><br><span class="line">server.port=8080</span><br><span class="line"># 下面三个配置可以解决编码问题</span><br><span class="line">server.tomcat.uri-encoding=UTF-8</span><br><span class="line"></span><br><span class="line">spring.http.encoding.charset=UTF-8</span><br><span class="line">spring.http.encoding.enabled=true</span><br><span class="line"></span><br><span class="line"># JDBC驱动名称，必填</span><br><span class="line">spring.datasource.driver-class-name=com.mysql.jdbc.Driver</span><br><span class="line"># 数据库url，别忘了创建对应的数据库哦</span><br><span class="line">spring.datasource.url=jdbc:mysql://127.0.0.1:3306/SpringBootDemo?characterEncoding=utf-8&amp;useSSL=false</span><br><span class="line"># 数据库用户名</span><br><span class="line">spring.datasource.username=root</span><br><span class="line"># 数据库密码，为了保密就不写我的了...</span><br><span class="line">spring.datasource.password=</span><br><span class="line"></span><br><span class="line"># 数据库方言，这里的意思是告诉JPA我使用的是MySql 5.7版本数据库，感觉不写也可以...不过我是一直都写的</span><br><span class="line">spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL57InnoDBDialect</span><br><span class="line"># 项目启动时对数据库表的更新策略，有多种属性值可填，我就不详细说了...</span><br><span class="line">spring.jpa.properties.hibernate.hbm2ddl.auto=update</span><br><span class="line"># 是否在日志中打印sql语句，默认是不显示的，但显示sql语句有助于debug</span><br><span class="line">spring.jpa.show-sql=true</span><br></pre></td></tr></table></figure></p>
+<p>　　终于可以开始写代码了（前面说的跟代码没有半点关系，我内心是崩溃的）！不过，好像还得给大家科普几个概念（内心彻底崩溃）……<br>　　首先是ORM，全称是Object/Relation Mapping，即对象/关系数据库映射。可以将ORM理解成一种规范，它概括了这类框架的基本特征，完成面向对象的编程语言到关系数据库的映射。说白了，在ORM规范中，将一个持久化类看成数据库中的一个表，比方说有一个User类，就对应着一个user表；将这个持久化类的一个对象看成数据库表的一行，比方说创建一个User类的实例user1，就相当于在user表中添加了一行数据；对象的一个属性看成数据库表的一列（一个字段），比方说User类有username、password等属性，user表中就有相应的username、password字段。这样解释应该能明白吧……<br>　　其次是JPA，全称是Java Persistence API，即Java持久层API。JPA也不是一项具体的技术，而是Sun公司定义的Java ORM及实体操作API的标准。额……大家知道这么回事就好，说的太详细怕给整迷糊了。<br>　　最后是我们用到的Spring Data JPA，这个框架才是JPA标准的具体实现。不知道大家用没用过Hibernate，如果之前用过Hibernate，那上手Spring Data JPA就容易多了，因为这个框架基于Hibernate，对它进行了再次封装，极大地简化了持久层业务逻辑的代码，具体怎么简化的，我待会会说，相信大家看完一定会惊叹于Spring Data JPA的美妙（其实还想说一下MyBaits与上面这两个框架的区别，想了想还是算了，毕竟“面向新手”）。<br>　　终于终于可以开始写代码了（开心）！先要确定项目的结构，一个项目怎么也得由以下这几部分组成：<br><img src="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330142915.png" alt="图片未加载成功"><br>　　为了方便演示，模拟一个图书管理功能。首先在/data/entity中创建图书实体类：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line">package com.hawk.data.entity;</span><br><span class="line"></span><br><span class="line">import lombok.AllArgsConstructor;</span><br><span class="line">import lombok.Data;</span><br><span class="line">import lombok.NoArgsConstructor;</span><br><span class="line">import org.hibernate.annotations.CreationTimestamp;</span><br><span class="line">import org.hibernate.annotations.UpdateTimestamp;</span><br><span class="line"></span><br><span class="line">import javax.persistence.*;</span><br><span class="line">import java.util.Date;</span><br><span class="line"></span><br><span class="line">// 表明这是一个实体类，必须要有</span><br><span class="line">@Entity</span><br><span class="line">// 关于实体类映射成的数据库表的一些信息，如表名等，可以没有</span><br><span class="line">// 如果没有，则表名与实体类名一致</span><br><span class="line">@Table(name = &quot;book&quot;)</span><br><span class="line">// Lombok注解，自动生成setter、getter方法，重写toString、equals方法</span><br><span class="line">@Data</span><br><span class="line">// Lombok注解，自动生成初始化所有属性的构造方法</span><br><span class="line">@AllArgsConstructor</span><br><span class="line">// Lombok注解，自动生成无参的构造方法</span><br><span class="line">@NoArgsConstructor</span><br><span class="line">public class Book &#123;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 自增id</span><br><span class="line">     * </span><br><span class="line">     * @Id 注解表明这是user表的主键</span><br><span class="line">     * @GeneratedValue 注解指定主键的自增长策略，还有其他策略可填，大家自行百度</span><br><span class="line">     */</span><br><span class="line">    @Id</span><br><span class="line">    @GeneratedValue(strategy = GenerationType.IDENTITY)</span><br><span class="line">    private Long id;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 书名</span><br><span class="line">     * </span><br><span class="line">     * 可以使用@Conlumn注解指定关于书名这一列的相关信息，如列名、列的长度等</span><br><span class="line">     * 不过我一般懒得指定，直接沿用默认配置就好，所以说@Column注解可以没有</span><br><span class="line">     */</span><br><span class="line">    @Column(name = &quot;book_name&quot;, length = 50)</span><br><span class="line">    private String bookName;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 图书价格</span><br><span class="line">     */</span><br><span class="line">    private double price;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 创建时间</span><br><span class="line">     * </span><br><span class="line">     * 下面两个关于时间的注解@CreationTimestamp和@UpdateTimestamp</span><br><span class="line">     * 可以在我们创建或修改对象时自动更新所修饰的时间属性</span><br><span class="line">     * 省去了我们手动更新时间的麻烦</span><br><span class="line">     */</span><br><span class="line">    @CreationTimestamp</span><br><span class="line">    private Date createTime;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 修改时间</span><br><span class="line">     */</span><br><span class="line">    @UpdateTimestamp</span><br><span class="line">    private Date updateTime;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>　　写到这里就可以运行一下Spring Boot了，可以在两个地方启动Spring Boot项目：<br><img src="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330145509.png" alt="图片未加载成功"><br> 　　一个是右上角的箭头，还有一个是根目录下的SpringBootDemoApplication类（具体类名与项目名有关），这个类是Spring Boot项目的总入口类（像普通的Java程序一样，有main方法），运行这个类中的main方法，也可以启动项目。<br> 　　如果你按我上面说的做，启动项目是完全没有问题的。启动之后打开数据库，你会发现里面多了一个book表：<br><img src="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330145652.png" alt="图片未加载成功"><br>　　可是我刚刚并没有建表，这就是Hibernate、Spring Data JPA等JPA框架的一大功能——<strong>自动建表</strong>。通过这个表，相信大家能更好地理解我上面说的ORM规范。<br>　　然后就可以开始编写数据访问有关的逻辑了。在/repo下新建一个BookRepo<strong>接口</strong>：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">package com.hawk.repo;</span><br><span class="line"></span><br><span class="line">import com.hawk.data.entity.Book;</span><br><span class="line">import org.springframework.data.jpa.repository.JpaRepository;</span><br><span class="line"></span><br><span class="line">public interface BookRepo extends JpaRepository&lt;Book, Long&gt; &#123;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>　　从这一步开始，就能逐渐感受到Spring Data JPA的强大了。首先BookRepo接口继承了JpaRepository，而JpaRepository是一个泛型接口，两个泛型参数第一个是所要访问的实体类的类型，第二个是实体类主键的类型，大家一定要与所要访问的实体类对应起来，不要写错。别看我只定义了一个BookRepo接口，但此时这个接口已经具有很多能力了！大家可以按住Ctrl并点击JpaRepository查看它的源码：<br><img src="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330173120.png" alt="图片未加载成功"><br> 　　可以看到，JpaRepository接口已经预先定义了很多方法，这些方法，继承它的BookRepo都可以拿来用！当然怎么用我一会会说，这些方法具体是干什么的，相信大家可以根据方法名推断出来，我就不一一去说了。那怎么编写我自己的CRUD方法呢，比方说我想根据书名查到对应的图书，只需要在BookRepo里加上一句：<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Book findByBookName(String bookName);</span><br></pre></td></tr></table></figure></p>
+<p> 　　然后啊……然后就没了，Spring Data JPA框架的一大特点就在于——可以<strong>通过解析方法名创建查询</strong>。你写这么一个方法名，就相当于告诉Spring Data JPA，“我想根据书名去查询图书！”。Spring Data JPA会自动帮你实现这个方法。大家可以去查一下Spring Data JPA中的查询关键字，真的真的很有趣。<br> 　　当然，使用关键字去创建查询，也是有很大限制的，不能表达比较复杂的查询，这时候就需要我们自己去编写语句了。比方说还是根据书名查到对应的图书，可以这么写：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">@Query(&quot;select b from Book b where b.bookName = ?1&quot;)</span><br><span class="line">Book findByBookName(String bookName);</span><br></pre></td></tr></table></figure></p>
+<p>　　这么写，@Query注解里面的查询语句就会把Spring Data JPA帮你实现的查询语句覆盖掉。可能有人要问，@Query注解里的语句是啥玩意，像SQL又不是SQL，看不懂啊。这个是JPQL语句，是一种完全面向对象的查询语句，大家可以去搜一下JPQL语句的基本语法，因为它类似于SQL，所以只要有SQL基础，上手起来并不难。<br>　　以上这两种方式，基本上可以应对大部分查询的需要。我建议，能用关键字表达的查询就直接写关键字，用关键字不好表达的再采用@Query注解加JPQL的形式。如果说有更为复杂的条件查询（大家目前大概不会遇到），可以采用Hibernate的Criteria对查询语句进行拼接。<br>　　当然，update和delete方法是不能使用查询关键字的，只能采用@Query注解加JPQL的形式。这里需要注意，update和delete方法前，必须要加上@Modifying和@Transactional注解，不加，就会报错，记住就好……比方说写一个修改书名的方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@Modifying</span><br><span class="line">@Transactional</span><br><span class="line">@Query(&quot;update Book b set b.bookName = ?1 where b.id = ?2&quot;)</span><br><span class="line">void updateBookName(String bookName, Long id);</span><br></pre></td></tr></table></figure></p>
+<p>　　service层主要包括与数据访问层的交互和比较复杂的业务逻辑，这里我就写的稍微简单一点。新建一个BookService：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">package com.hawk.service;</span><br><span class="line"></span><br><span class="line">import com.hawk.data.entity.Book;</span><br><span class="line">import com.hawk.repo.BookRepo;</span><br><span class="line">import org.springframework.stereotype.Service;</span><br><span class="line"></span><br><span class="line">import javax.annotation.Resource;</span><br><span class="line">import java.util.List;</span><br><span class="line"></span><br><span class="line">@Service</span><br><span class="line">public class BookService &#123;</span><br><span class="line"></span><br><span class="line">    @Resource</span><br><span class="line">    private BookRepo bookRepo;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 新增图书</span><br><span class="line">     *</span><br><span class="line">     * @param newBook</span><br><span class="line">     */</span><br><span class="line">    public void saveBook(Book newBook) &#123;</span><br><span class="line">        Book book = new Book();</span><br><span class="line">        book.setBookName(newBook.getBookName());</span><br><span class="line">        book.setPrice(newBook.getPrice());</span><br><span class="line">        bookRepo.save(book);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 获得所有图书</span><br><span class="line">     * </span><br><span class="line">     * @return</span><br><span class="line">     */</span><br><span class="line">    public List&lt;Book&gt; findAllBooks() &#123;</span><br><span class="line">        return bookRepo.findAll();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 根据书名查询图书</span><br><span class="line">     *</span><br><span class="line">     * @param bookName</span><br><span class="line">     * @return</span><br><span class="line">     */</span><br><span class="line">    public Book findByBookName(String bookName) &#123;</span><br><span class="line">        return bookRepo.findByBookName(bookName);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>　　写的确实有点过于简单了……但是，我要重点解释一下上面出现的两个注解@Service和@Resource，这是Spring框架的精髓。@Service注解表示，这个类是Spring框架中的一个组件，受到Spring框架的管理。其实刚刚的BookRepo也应该被标记为一个组件，不过Spring Boot会自动把继承了Repository相关接口的接口标记为它的组件（有点绕，大家应该能看懂），这大概也是“自动配置”的效果吧。既然成为了Spring框架中的一个组件，那这个类从创建到销毁的生命周期就由Spring框架来管理，完全不需要我们去管。当然了，如果你不理解我上面说的，也不影响你写代码……别忘了加@Service就好。<br>　　至于@Resource注解，就更重要了。毕竟提起Spring人们都会想到IoC（控制反转）和AOP（面向切面编程），@Resource注解就是IoC的直接体现。大家都知道，调用对象的方法前先要实例化这个对象，而我上面的代码并没有实例化BookRepo（当然了也没法实例化，毕竟BookRepo是一个接口），却能调用bookRepo对象的方法。这是因为Spring帮我们创建了一个实现了BookRepo接口的类的实例对象（有点绕，希望大家能看懂，断句是：创建了一个/实现了BookRepo接口的类的/实例对象），并注入到被@Resource修饰的bookRepo对象中，因此才能调用bookRepo对象的方法。这里稍微提一下，与@Resource具有相同功能的注解是@Autowired，都能实现依赖注入，不过我推荐使用@Resource。因为@Resource是Java EE规范定义的注解，而@Autowired是Spring框架定义的注解，使用@Resource有利于与具体框架解耦。当然当然了，还是那句话，如果你不理解我上面说的，也不影响你写代码……别忘了就好。<br>　　最后就是编写controller层了，controller层其实就是对Spring MVC框架的使用。Spring MVC作为一款Web框架，在设计上很大程度上借鉴了Spring，并且通常都是与Spring一起配合使用。Spring MVC在项目中的作用就相当于Servlet一样（但它俩完全不是一回事啊，我就这么比喻一下），负责处理HTTP请求，并返回响应。学习Spring MVC，最关键的就是掌握它包含的注解的用法。<br>　　既然提到HTTP请求了，就不得不简单说一下前后端分离。什么前后端分离、RESTful API，都是近些年来兴起的一些名词，并逐渐成为主流。前后端分离，在我看来，主要是为了应对多客户端的需要。比方说我的项目同时有PC端网站、Android App、iOS App、微信小程序等多个客户端，采用前后端分离，只需要开发一个后端就可以了。后端提供API，前端调用API获得数据，从而构建出完整的网页。大家可以简单地将前后端分离理解为——前后端通过json进行通信交流。<br>　　为了规范，大家需要定义后端返回响应的的实体类。在/data下新建一个ResponseMessage类：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">package com.hawk.data;</span><br><span class="line"></span><br><span class="line">import lombok.AllArgsConstructor;</span><br><span class="line">import lombok.Data;</span><br><span class="line"></span><br><span class="line">@Data</span><br><span class="line">@AllArgsConstructor</span><br><span class="line">public class ResponseMessage &#123;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 状态码</span><br><span class="line">     */</span><br><span class="line">    private int code;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 信息</span><br><span class="line">     */</span><br><span class="line">    private String msg;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 是否成功</span><br><span class="line">     */</span><br><span class="line">    private boolean success;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 数据</span><br><span class="line">     */</span><br><span class="line">    private Object data;</span><br><span class="line"></span><br><span class="line">    public ResponseMessage(int code, String msg, boolean success) &#123;</span><br><span class="line">        this.code = code;</span><br><span class="line">        this.msg = msg;</span><br><span class="line">        this.success = success;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static ResponseMessage error(int code, String msg) &#123;</span><br><span class="line">        return new ResponseMessage(code, msg, false);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static ResponseMessage successMessage(Object data) &#123;</span><br><span class="line">        return new ResponseMessage(0, &quot;success&quot;, true, data);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static ResponseMessage successMessage() &#123;</span><br><span class="line">        return new ResponseMessage(0, &quot;success&quot;, true, null);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static ResponseMessage failedMessage(String message) &#123;</span><br><span class="line">        return new ResponseMessage(1, message, false, null);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static ResponseMessage failedMessage() &#123;</span><br><span class="line">        return new ResponseMessage(1, &quot;failed&quot;, false, null);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>　　ResponseMessage具体怎么用呢，可以看我下面的示例。在controller下新建一个BookController：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line">package com.hawk.controller;</span><br><span class="line"></span><br><span class="line">import com.hawk.data.ResponseMessage;</span><br><span class="line">import com.hawk.data.entity.Book;</span><br><span class="line">import com.hawk.service.BookService;</span><br><span class="line">import org.springframework.web.bind.annotation.*;</span><br><span class="line"></span><br><span class="line">import javax.annotation.Resource;</span><br><span class="line">import java.util.List;</span><br><span class="line"></span><br><span class="line">// 这是一个组合注解，包括两个注解@Controller和@ResponseBody</span><br><span class="line">// @Controller和刚才的@Service一样，将这个类标记为Spring中的一个组件</span><br><span class="line">// @ResponseBody将该类中所有响应请求的方法的返回值转换为json格式（前后端分离的关键！）</span><br><span class="line">@RestController</span><br><span class="line">// 设置url映射，即一会访问接口的地址</span><br><span class="line">@RequestMapping(&quot;/book&quot;)</span><br><span class="line">public class BookController &#123;</span><br><span class="line"></span><br><span class="line">    // 明确依赖关系，controller依赖于service，service依赖于repo</span><br><span class="line">    @Resource</span><br><span class="line">    private BookService bookService;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 新增图书</span><br><span class="line">     *</span><br><span class="line">     * 因为前后端是通过json通信的，因此在添加图书时需要从前端传入一个Book类型的json串</span><br><span class="line">     * @RequestBody 注解将前端传入的json串转化为Book对象</span><br><span class="line">     * @PostMapping 与刚才的@RequestMapping作用一样，都是设置url映射，不过它指定请求类型为POST</span><br><span class="line">     *</span><br><span class="line">     * @param book</span><br><span class="line">     * @return</span><br><span class="line">     */</span><br><span class="line">    @PostMapping(&quot;/book&quot;)</span><br><span class="line">    public ResponseMessage addBook(@RequestBody Book book) &#123;</span><br><span class="line">        bookService.saveBook(book);</span><br><span class="line">        return ResponseMessage.successMessage();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 获得所有图书</span><br><span class="line">     * </span><br><span class="line">     * @GetMapping 与刚才的@RequestMapping作用一样，都是设置url映射，不过它指定请求类型为GET</span><br><span class="line">     * </span><br><span class="line">     * @return</span><br><span class="line">     */</span><br><span class="line">    @GetMapping(&quot;/books&quot;)</span><br><span class="line">    public ResponseMessage getBookList() &#123;</span><br><span class="line">        List&lt;Book&gt; books = bookService.findAllBooks();</span><br><span class="line">        return ResponseMessage.successMessage(books);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 根据书名查询图书</span><br><span class="line">     * </span><br><span class="line">     * @RequestParam(&quot;bookName&quot;) 表示将请求参数bookName的值赋给@RequestParam修饰的的参数bookName</span><br><span class="line">     * 如果不写括号中的内容，即只写@RequestParam，则请求参数的名称需要与@RequestParam修饰的的参数名一致</span><br><span class="line">     * </span><br><span class="line">     * @param bookName</span><br><span class="line">     * @return</span><br><span class="line">     */</span><br><span class="line">    @GetMapping(&quot;/book&quot;)</span><br><span class="line">    public ResponseMessage getBook(@RequestParam(&quot;bookName&quot;) String bookName) &#123;</span><br><span class="line">        Book book = bookService.findByBookName(bookName);</span><br><span class="line">        return ResponseMessage.successMessage(book);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>　　其实写到这里，基本上整个项目就完工了（非常简陋的项目）。但我还是忍不住给大家推荐一个工具——Swagger。既然前后端分离了，那么后端怎么告诉前端各个接口的作用呢，一般都要去写接口文档。而使用Swagger可以自动生成接口文档，并且能对开发好的接口进行测试，非常方便。<br>　　使用Swagger，先要在pom.xml文件中引入依赖：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">	&lt;groupId&gt;io.springfox&lt;/groupId&gt;</span><br><span class="line">	&lt;artifactId&gt;springfox-swagger2&lt;/artifactId&gt;</span><br><span class="line">	&lt;version&gt;2.8.0&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">	&lt;groupId&gt;io.springfox&lt;/groupId&gt;</span><br><span class="line">	&lt;artifactId&gt;springfox-swagger-ui&lt;/artifactId&gt;</span><br><span class="line">	&lt;version&gt;2.8.0&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure></p>
+<p>　　接着改写一下刚才的BookController，增加一些说明性质的注解：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line">package com.hawk.controller;</span><br><span class="line"></span><br><span class="line">import com.hawk.data.ResponseMessage;</span><br><span class="line">import com.hawk.data.entity.Book;</span><br><span class="line">import com.hawk.service.BookService;</span><br><span class="line">import io.swagger.annotations.ApiOperation;</span><br><span class="line">import io.swagger.annotations.ApiParam;</span><br><span class="line">import org.springframework.web.bind.annotation.*;</span><br><span class="line"></span><br><span class="line">import javax.annotation.Resource;</span><br><span class="line">import java.util.List;</span><br><span class="line"></span><br><span class="line">// 这是一个组合注解，包括两个注解@Controller和@ResponseBody</span><br><span class="line">// @Controller和刚才的@Service一样，将这个类标记为Spring中的一个组件</span><br><span class="line">// @ResponseBody将该类中所有响应请求方法的返回值转换为json格式（前后端分离的关键！）</span><br><span class="line">@RestController</span><br><span class="line">// 设置url映射，即一会访问接口的地址</span><br><span class="line">@RequestMapping(&quot;/book&quot;)</span><br><span class="line">public class BookController &#123;</span><br><span class="line"></span><br><span class="line">    // 明确依赖关系，controller依赖于service，service依赖于repo</span><br><span class="line">    @Resource</span><br><span class="line">    private BookService bookService;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 新增图书</span><br><span class="line">     *</span><br><span class="line">     * 因为前后端是通过json通信的，因此在添加图书时需要从前端传入一个Book类型的json串</span><br><span class="line">     * @RequestBody 注解将前端传入的json串转化为Book对象</span><br><span class="line">     * @PostMapping 与刚才的@RequestMapping作用一样，都是设置url映射，不过它指定请求类型为POST</span><br><span class="line">     *</span><br><span class="line">     * @param book</span><br><span class="line">     * @return</span><br><span class="line">     */</span><br><span class="line">    @ApiOperation(value = &quot;新增图书&quot;, notes = &quot;需要传入图书对象&quot;)</span><br><span class="line">    @PostMapping(&quot;/book&quot;)</span><br><span class="line">    public ResponseMessage addBook(</span><br><span class="line">            @ApiParam(name = &quot;book&quot;, value = &quot;新增图书，包括书名、图书价格&quot;) @RequestBody Book book) &#123;</span><br><span class="line">        bookService.saveBook(book);</span><br><span class="line">        return ResponseMessage.successMessage();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 获得所有图书</span><br><span class="line">     *</span><br><span class="line">     * @GetMapping 与刚才的@RequestMapping作用一样，都是设置url映射，不过它指定请求类型为GET</span><br><span class="line">     *</span><br><span class="line">     * @return</span><br><span class="line">     */</span><br><span class="line">    @ApiOperation(value = &quot;获得所有图书&quot;)</span><br><span class="line">    @GetMapping(&quot;/books&quot;)</span><br><span class="line">    public ResponseMessage getBookList() &#123;</span><br><span class="line">        List&lt;Book&gt; books = bookService.findAllBooks();</span><br><span class="line">        return ResponseMessage.successMessage(books);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 根据书名查询图书</span><br><span class="line">     *</span><br><span class="line">     * @RequestParam(&quot;bookName&quot;) 表示将请求参数bookName的值赋给@RequestParam修饰的的参数bookName</span><br><span class="line">     * 如果不写括号中的内容，即只写@RequestParam，则请求参数的名称需要与@RequestParam修饰的的参数名一致</span><br><span class="line">     *</span><br><span class="line">     * @param bookName</span><br><span class="line">     * @return</span><br><span class="line">     */</span><br><span class="line">    @ApiOperation(value = &quot;根据书名查询图书&quot;, notes = &quot;需要传入书名&quot;)</span><br><span class="line">    @GetMapping(&quot;/book&quot;)</span><br><span class="line">    public ResponseMessage getBook(</span><br><span class="line">            @ApiParam(name = &quot;bookName&quot;, value = &quot;需要查询的书名&quot;) @RequestParam(&quot;bookName&quot;) String bookName) &#123;</span><br><span class="line">        Book book = bookService.findByBookName(bookName);</span><br><span class="line">        return ResponseMessage.successMessage(book);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>　　最后，在根目录（也就是和入口类同一级的目录）下新增一个Swagger的配置类（复制过去就好，不过有几个需要修改的地方，大家应该能看出来）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">package com.hawk;</span><br><span class="line"></span><br><span class="line">import org.springframework.context.annotation.Bean;</span><br><span class="line">import org.springframework.context.annotation.Configuration;</span><br><span class="line">import org.springframework.web.context.request.async.DeferredResult;</span><br><span class="line">import springfox.documentation.builders.ApiInfoBuilder;</span><br><span class="line">import springfox.documentation.builders.PathSelectors;</span><br><span class="line">import springfox.documentation.builders.RequestHandlerSelectors;</span><br><span class="line">import springfox.documentation.service.ApiInfo;</span><br><span class="line">import springfox.documentation.spi.DocumentationType;</span><br><span class="line">import springfox.documentation.spring.web.plugins.Docket;</span><br><span class="line">import springfox.documentation.swagger2.annotations.EnableSwagger2;</span><br><span class="line"></span><br><span class="line">@Configuration</span><br><span class="line">@EnableSwagger2</span><br><span class="line">public class Swagger2 &#123;</span><br><span class="line"></span><br><span class="line">    @Bean</span><br><span class="line">    public Docket createRestApi() &#123;</span><br><span class="line">        return new Docket(DocumentationType.SWAGGER_2)</span><br><span class="line">                .groupName(&quot;com.hawk&quot;)</span><br><span class="line">                .genericModelSubstitutes(DeferredResult.class)</span><br><span class="line">                .useDefaultResponseMessages(false)</span><br><span class="line">                .apiInfo(apiInfo())</span><br><span class="line">                .pathMapping(&quot;/&quot;)</span><br><span class="line">                .select()</span><br><span class="line">                .apis(RequestHandlerSelectors.basePackage(&quot;com.hawk.controller&quot;))</span><br><span class="line">                .paths(PathSelectors.any())</span><br><span class="line">                .build();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private ApiInfo apiInfo() &#123;</span><br><span class="line">        return new ApiInfoBuilder()</span><br><span class="line">                .title(&quot;Spring Boot Demo&quot;)</span><br><span class="line">                .description(&quot;这是一个Spring Boot框架的demo&quot;)</span><br><span class="line">                .termsOfServiceUrl(&quot;http://localhost:8080&quot;)</span><br><span class="line">                .version(&quot;1.0&quot;)</span><br><span class="line">                .build();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>　　这样就算写完啦~马上运行一下试试！运行项目，如果不报错的话，在浏览器中输入<a href="http://localhost:8080/swagger-ui.html" target="_blank" rel="noopener">http://localhost:8080/swagger-ui.html</a> ，就能看到刚刚写的三个接口了：<br><img src="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330204846.png" alt="图片未加载成功"><br>　　点开那几个下拉栏，就可以对接口进行测试了。比方说我新增一本书，然后查看所有图书：<br><img src="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330205653.png" alt="图片未加载成功"><br><img src="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330205739.png" alt="图片未加载成功"><br><img src="http://p44lruo4o.bkt.clouddn.com/TIM%E6%88%AA%E5%9B%BE20180330205757.png" alt="图片未加载成功"><br>　　emmm应该是没什么可说的了。看完这篇文章，应该说就完成了入门Spring Boot的……十分之一吧。想要达到那十分之九，最快捷的方法就是——抄。我也是从“抄”过来的，慢慢地达到了自己“造”。所以说不想看书的话（市面上貌似没有很好的学Spring Boot的书，推荐大家搜一些相关的博客），就去多见识一下项目吧。项目可以是老师给的，也欢迎大家来看我（<a href="https://github.com/HAWK97" target="_blank" rel="noopener">https://github.com/HAWK97</a> ）和Stalary(<a href="https://github.com/stalary" target="_blank" rel="noopener">https://github.com/stalary</a> )在GitHub上的开源项目（我写的贼菜，多看看他写的）。当然了，如何使用GitHub和Git呢，太麻烦了，我教不了……<br>　　……<br>　　……<br>　　……<br>　　额，还是想说点什么。不知道大家看到这里花了多少时间，反正我写完再重新读的时候绝对超过了五分钟，大家花的时间应该会更长（当然肯定也有根本不看的）。大家看着可能觉得我写的很轻松，其实里面的每句话，我都字字斟酌，写了很久（分好几天写的，加起来四个小时左右吧），一是想把一些抽象的概念尽量通俗地表达出来，二是因为我对一些概念的理解有限，不想误导大家，所以我拿不准的地方都经过了反复验证。我写这个，不光是教给大家Spring Boot的创建和使用，这应该是最基本的。我想做的，是展示一个完整的项目应该从哪里入手，包含哪些部分，如果大家看完之后能有所收获，我也就开心了。<br>　　写完之后我就在想，写这个对我有什么好处、有什么意义吗，我是不是傻，想了会终于想明白了，果然就是有点傻……我应该，是班里最希望大家能把技术学好的人了吧。一直以来我都希望，身边能有一个好的技术氛围，大家能在一起谈论一些“上档次”的技术问题，而不是纠结于使用哪个开发工具、软件怎么安装这种幼稚的问题……希望能，唉，不希望了，没可能实现的。<br>　　至于完全不想学技术的人，我很能理解这种心情，我也很支持这些人不学技术（不是反话啊，真心支持）。因为学技术如果只是浅尝辄止的话，浪费了时间和精力，还学不到什么有用的东西，这是没有意义的，不如把自己该做的事做好（我不知道什么叫“该做的事”，可能是摆在deadline上的事吧）。那这些人要怎么完成项目呢？有句话叫“善人自有天助”，建议这些人从今天开始日行一善，多做好事，说不定哪天醒了，就能看到自己的项目奇迹般地实现了。当然了，还有一种办法，就是看看身边有没有能帮自己去写的，请那个人吃点好吃的，说不定他会愿意帮你去写（明示了！）。<br>　　……额，开个玩笑啊。不想学技术这个时候就只能硬着头皮去学啦~人总会被迫做一些自己不想做的事情的，要学会忍耐。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/19/Redis缓存配置问题/" rel="next" title="拾遗：Spring Boot 2.0 Redis缓存配置问题">
+                <i class="fa fa-chevron-left"></i> 拾遗：Spring Boot 2.0 Redis缓存配置问题
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/05/10/牛刀小试：消息队列的Redis实现/" rel="prev" title="牛刀小试：消息队列的Redis实现">
+                牛刀小试：消息队列的Redis实现 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="SOHUCS"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Hawk" />
+            
+              <p class="site-author-name" itemprop="name">Hawk</p>
+              <p class="site-description motion-element" itemprop="description">Don't ruin a good today by thinking about a bad yesterday.</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/HAWK97" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:wsghawk97@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-globe"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Hawk</span>
+
+  
+
+  
+</div>
+<div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+        本站访客数<span id="busuanzi_value_site_uv"></span>人
+</span>
+</div>
+&nbsp&nbsp|&nbsp&nbsp
+<div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_pv">
+	本站总访问量<span id="busuanzi_value_site_pv"></span>次
+</span>
+</div>
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Muse</a> v6.0.1</div>
+
+-->
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+  
+    <script type="text/javascript">
+    (function(){
+      var appid = 'cytBwQz5R';
+      var conf = '45a7b97bccc404fc874e95464b33b9a5';
+      var width = window.innerWidth || document.documentElement.clientWidth;
+      if (width < 960) {
+      window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){
+        window.changyan.api.config({appid:appid,conf:conf})});
+      }
+    })();
+    </script>
+    <script type="text/javascript" src="https://assets.changyan.sohu.com/upload/plugins/plugins.count.js"></script>
+  
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

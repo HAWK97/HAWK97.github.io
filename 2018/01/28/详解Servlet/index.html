@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+<meta name="description" content="最近在看《看透Spring MVC 源代码分析与实践》这本书，觉得真心不错。这本书不单单讲的是Spring MVC，第一章为网站基础知识，包括网站架构、常见协议、Servlet和Tomcat等内容。虽然在做开发的时候并不会直接用到，不过理解了之后可以让我们在进行具体开发的时候更加得心应手，还可以通过对具体内容的学习学到一些优秀思想。这次我想先从最简单的Servlet内容谈起，毕竟每个Java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《看透Spring MVC 源代码分析与实践》读书笔记——详解Servlet">
+<meta property="og:url" content="http://yoursite.com/2018/01/28/详解Servlet/index.html">
+<meta property="og:site_name" content="Hawk&#39;s Repository">
+<meta property="og:description" content="最近在看《看透Spring MVC 源代码分析与实践》这本书，觉得真心不错。这本书不单单讲的是Spring MVC，第一章为网站基础知识，包括网站架构、常见协议、Servlet和Tomcat等内容。虽然在做开发的时候并不会直接用到，不过理解了之后可以让我们在进行具体开发的时候更加得心应手，还可以通过对具体内容的学习学到一些优秀思想。这次我想先从最简单的Servlet内容谈起，毕竟每个Java">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://ohfk1r827.bkt.clouddn.com/servlet1.png">
+<meta property="og:updated_time" content="2018-07-06T12:04:53.288Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="《看透Spring MVC 源代码分析与实践》读书笔记——详解Servlet">
+<meta name="twitter:description" content="最近在看《看透Spring MVC 源代码分析与实践》这本书，觉得真心不错。这本书不单单讲的是Spring MVC，第一章为网站基础知识，包括网站架构、常见协议、Servlet和Tomcat等内容。虽然在做开发的时候并不会直接用到，不过理解了之后可以让我们在进行具体开发的时候更加得心应手，还可以通过对具体内容的学习学到一些优秀思想。这次我想先从最简单的Servlet内容谈起，毕竟每个Java">
+<meta name="twitter:image" content="http://ohfk1r827.bkt.clouddn.com/servlet1.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/01/28/详解Servlet/"/>
+
+
+  <title>《看透Spring MVC 源代码分析与实践》读书笔记——详解Servlet | Hawk's Repository</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hawk's Repository</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">一个还行的技术博客</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/28/详解Servlet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hawk">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hawk's Repository">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">《看透Spring MVC 源代码分析与实践》读书笔记——详解Servlet</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-28T19:25:33+08:00">2018-01-28</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/web/" itemprop="url" rel="index"><span itemprop="name">web</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+              <span class="post-meta-divider">|</span>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-comment-o"></i>
+              </span>
+              
+                <a href="/2018/01/28/详解Servlet/#SOHUCS" itemprop="discussionUrl">
+                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2018/01/28/详解Servlet/" itemprop="commentsCount"></span>
+                </a>
+              
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>　　最近在看《看透Spring MVC 源代码分析与实践》这本书，觉得真心不错。这本书不单单讲的是Spring MVC，第一章为网站基础知识，包括网站架构、常见协议、Servlet和Tomcat等内容。虽然在做开发的时候并不会直接用到，不过理解了之后可以让我们在进行具体开发的时候更加得心应手，还可以通过对具体内容的学习学到一些优秀思想。这次我想先从最简单的Servlet内容谈起，毕竟每个Java Web开发人员应该对Servlet都不陌生。文章内容主要是对书中知识点的归纳总结，外加一部分自己的理解。<br><a id="more"></a><br>　　大家都知道Servlet是Server+Applet的缩写，表示一个服务器应用。其实Servlet就是一套规范，按照这套规范写的代码就可以直接在Java的服务器上运行。Servlet 3.1中Servlet的结构如下图所示（来源：<a href="http://www.54tianzhisheng.cn/2017/07/09/servlet/" target="_blank" rel="noopener">http://www.54tianzhisheng.cn/2017/07/09/servlet/</a> ，大家可以没事看看这个博客，有些内容讲的很好）：<br><img src="http://ohfk1r827.bkt.clouddn.com/servlet1.png" alt="图片未加载成功"></p>
+<h1 id="Servlet接口"><a href="#Servlet接口" class="headerlink" title="Servlet接口"></a>Servlet接口</h1><p>　　Servlet 3.1中Servlet接口的定义如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public interface Servlet &#123;</span><br><span class="line">  </span><br><span class="line">    public void init(ServletConfig config) throws ServletException;</span><br><span class="line">  </span><br><span class="line">    public ServletConfig getServletConfig();</span><br><span class="line">  </span><br><span class="line">    public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException;</span><br><span class="line">  </span><br><span class="line">    public String getServletInfo();</span><br><span class="line">  </span><br><span class="line">    public void destroy();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>　　init方法在容器启动时被容器调用且只会调用一次（当load-on-startup设置为负数或不设置时会在Servlet第一次被用到时被调用）。init方法被调用时，由容器传给它一个ServletConfig类型的参数，ServletConfig顾名思义指的是Servlet的配置，我们在web.xml中定义Servlet时通过init-param标签配置的参数就是通过ServletConfig来保存的；<br>　　getServletConfig方法用于获取这个ServletConfig对象；<br>　　service方法用于具体处理一个请求，它处理的请求是不限请求类型的。具体怎么处理呢，一会讲到实现它的方法的时候会说；<br>　　getServlet方法可以获取一些Servlet相关的信息，需要自己实现，默认返回空字符串；<br>　　destroy方法主要用于在Servlet销毁（一般指关闭服务器）时释放一些资源，也只会调用一次。</p>
+<h1 id="ServletConfig接口"><a href="#ServletConfig接口" class="headerlink" title="ServletConfig接口"></a>ServletConfig接口</h1><p>　　ServletConfig接口定义如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public interface ServletConfig &#123;</span><br><span class="line">  </span><br><span class="line">    public String getServletName();</span><br><span class="line">  </span><br><span class="line">    public ServletContext getServletContext();</span><br><span class="line">  </span><br><span class="line">    public String getInitParameter(String name);</span><br><span class="line">  </span><br><span class="line">    public Enumeration&lt;String&gt; getInitParameterNames();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>　　getServletName用于获取Servlet的名字，也就是我们在web.xml中定义的servlet-name；<br>　　getInintParameter用于获取init-param配置的参数；<br>　　getInitParameterNames用于获取配置的所有init-param的名字集合；<br>　　<strong>getServletContext的返回值ServletContext代表这个应用本身。</strong>我身边很多人都不明白“代表应用本身”是什么意思，这是说ServletContext里设置的参数，可以被当前应用的所有Servlet共享。大家经常在Session或Application中保存参数，而后者很多时候就是保存在了ServletContext中。可以把ServletConfig理解成Servlet级的，而ServletContext是Context（也就是Application）级的。当然，ServletContext的功能要强大很多，并不是保存一下配置参数。<br>　　可能上面说的比较抽象，下面来举一个例子。在web.xml文件中写如下配置信息：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&lt;context-param&gt;</span><br><span class="line">    &lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;</span><br><span class="line">    &lt;param-value&gt;application-context.xml&lt;/param-value&gt;</span><br><span class="line">&lt;/context-param&gt;</span><br><span class="line">&lt;servlet&gt;</span><br><span class="line">    &lt;servlet-name&gt;DemoServlet&lt;/servlet-name&gt;</span><br><span class="line">    &lt;servlet-class&gt;com.hawk.DemoServlet&lt;/servlet-class&gt;</span><br><span class="line">    &lt;init-param&gt;</span><br><span class="line">        &lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;</span><br><span class="line">        &lt;param-value&gt;demo-servlet.xml&lt;/param-value&gt;</span><br><span class="line">    &lt;/init-param&gt;</span><br><span class="line">&lt;/servlet&gt;</span><br></pre></td></tr></table></figure></p>
+<p>　　上面通过context配置的contextConfigLocation配置到了ServletContext中，而通过servlet下的init-param配置的contextConfigLocation配置到了ServletConfig中。在Servlet中可以分别通过它们的getInitParameter方法进行获取：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">String contextLocation = getServletConfig().getServletContext().getInitParameter(&quot;contextConfigLocation&quot;);</span><br><span class="line">String servletLocation = getServletConfig().getInitParameter(&quot;contextConfigLocation&quot;);</span><br></pre></td></tr></table></figure></p>
+<p>　　为了操作方便，GenericServlet定义了getInitParameter方法，内部返回getServletConfig().getInitParameter的返回值，因此如果需要获取SevletConfig中的参数，可以直接调用getInitParameter，而不必再调用getServletConfig()。<br>　　ServletContext中常见的用法就是保存Application级的属性，通过调用setAttribute方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">getServletContext().setAttribute(&quot;contextConfigLocation&quot;, &quot;new path&quot;);</span><br></pre></td></tr></table></figure></p>
+<p>　　而ServletConfig不可设置属性。</p>
+<h1 id="GenericServlet"><a href="#GenericServlet" class="headerlink" title="GenericServlet"></a>GenericServlet</h1><p>　　GenericServlet是Servlet的默认实现（注意：GenericServlet是一个抽象类，service方法并未被实现），是与具体协议无关的Servlet，主要做了三件事：（1）实现ServletConfig接口，可以直接调用ServletConfig里的方法；（2）提供了无参的init方法；（3）提供了log方法。下面分别来解释一下：<br>　　GenericServlet实现了ServletConfig接口，在需要调用ServletConfig中方法的时候可以直接调用，而不必先获取ServletConfig。比如，获取ServletContext的时候可以直接调用getServletContext，而无需调用getServletConfig().getServletContext()，不过和刚才说的getInitParameter一样，其底层实现其实是在内部调用了：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public ServletContext getServletContext() &#123;</span><br><span class="line">    return this.getServletConfig().getServletContext();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>　　GenericServlet实现了Servlet的init(ServletConfig config)方法，在里面将config设置给了内部属性config，然后调用了无参的init方法（这个无参的init方法是GenericServlet新增的，专门用于被它的子类覆盖）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public void init(ServletConfig config) throws ServletException &#123;</span><br><span class="line">    this.config = config;</span><br><span class="line">    this.init();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>　　这么写的作用很明显：首先将参数config设置给了内部属性config，这样就可以在ServletConfig的接口方法中直接调用config的相应方法来执行；其次，之后我们在写Servlet的时候就可以只处理自己的初始化逻辑（即只需覆盖无参的init方法），而不需要再关心config，也不需要再调用super.init(config)了。一开始说到容器启动时会调用init(ServletConfig config)方法，而该方法会调用无参的init方法，从而实现我们自己的初始化逻辑。需要注意的是，如果在自己的Servlet中重写了带参数的init方法，一定要记着调用init(config)，否则这里的config属性接收不到值，相应的ServletConfig接口方法就不能执行了。<br>　　GenericServlet提供两个log方法，一个记录日志，一个记录异常，具体实现是通过传给ServletContext的日志实现的。一般我们都有自己的日志处理方式，所以这两个log方法用得不是很多。</p>
+<h1 id="HttpServlet"><a href="#HttpServlet" class="headerlink" title="HttpServlet"></a>HttpServlet</h1><p>　　HttpServlet是用HTTP协议实现的Servlet的子类，一般我们在写Servlet的时候就是直接继承这个类，Spring MVC中最重要的DispatcherServlet也是继承的这个类。分析这个类主要关心的是如何处理请求，HttpServlet主要重写了service方法，首先将ServletRequest和ServletResponse转换成HttpServletRequest和HttpServletResponse，然后根据Http请求的类型不同将请求路由到了不同的处理方法，代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line">public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException &#123;</span><br><span class="line">    HttpServletRequest request;</span><br><span class="line">    HttpServletResponse response;</span><br><span class="line">    // 转换request和reponse的类型</span><br><span class="line">    // 如果请求类型不相符，则抛出异常</span><br><span class="line">    try &#123;</span><br><span class="line">        request = (HttpServletRequest)req;</span><br><span class="line">        response = (HttpServletResponse)res;</span><br><span class="line">    &#125; catch (ClassCastException var6) &#123;</span><br><span class="line">        throw new ServletException(&quot;non-HTTP request or response&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    this.service(request, response);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException &#123;</span><br><span class="line">    // 获取请求类型</span><br><span class="line">    String method = req.getMethod();</span><br><span class="line">    long lastModified;</span><br><span class="line">    // 将不同的请求类型路由到不同的处理方法</span><br><span class="line">    if (method.equals(&quot;GET&quot;)) &#123;</span><br><span class="line">        lastModified = this.getLastModified(req);</span><br><span class="line">        if (lastModified == -1L) &#123;</span><br><span class="line">            this.doGet(req, resp);</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            long ifModifiedSince;</span><br><span class="line">            try &#123;</span><br><span class="line">                ifModifiedSince = req.getDateHeader(&quot;If-Modified-Since&quot;);</span><br><span class="line">            &#125; catch (IllegalArgumentException var9) &#123;</span><br><span class="line">                ifModifiedSince = -1L;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            if (ifModifiedSince &lt; lastModified / 1000L * 1000L) &#123;</span><br><span class="line">                this.maybeSetLastModified(resp, lastModified);</span><br><span class="line">                this.doGet(req, resp);</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                resp.setStatus(304);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; else if (method.equals(&quot;HEAD&quot;)) &#123;</span><br><span class="line">        lastModified = this.getLastModified(req);</span><br><span class="line">        this.maybeSetLastModified(resp, lastModified);</span><br><span class="line">        this.doHead(req, resp);</span><br><span class="line">    &#125; else if (method.equals(&quot;POST&quot;)) &#123;</span><br><span class="line">        this.doPost(req, resp);</span><br><span class="line">    &#125; else if (method.equals(&quot;PUT&quot;)) &#123;</span><br><span class="line">        this.doPut(req, resp);</span><br><span class="line">    &#125; else if (method.equals(&quot;DELETE&quot;)) &#123;</span><br><span class="line">        this.doDelete(req, resp);</span><br><span class="line">    &#125; else if (method.equals(&quot;OPTIONS&quot;)) &#123;</span><br><span class="line">        this.doOptions(req, resp);</span><br><span class="line">    &#125; else if (method.equals(&quot;TRACE&quot;)) &#123;</span><br><span class="line">        this.doTrace(req, resp);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        String errMsg = lStrings.getString(&quot;http.method_not_implemented&quot;);</span><br><span class="line">        Object[] errArgs = new Object[]&#123;method&#125;;</span><br><span class="line">        errMsg = MessageFormat.format(errMsg, errArgs);</span><br><span class="line">        resp.sendError(501, errMsg);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>　　而像doGet、doPost这样的具体处理方法相信大家都很熟悉了，这里就不再概述，重点是HttpServlet将不同的请求方式路由到不同的处理方法这个实现思想。<br>　　最后呢，想谈一下我个人对Servlet这种底层事物的看法。有的人在学了各种框架后，就对Servlet、JDBC这种底层事物很不屑，毕竟实际开发中Servlet是用不到的。但我觉得，无论多么高级的框架，本质上都是对这些底层事物的封装，区别在于封装的程度不同，了解这些底层事物的实现细节，对于框架的学习能起到事半功倍的作用。<br>　　最后的最后，墙裂推荐《看透Spring MVC 源代码分析与实践》这本书，我觉得很OK。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/26/牛刀小试：SpringBoot整合Redis实现缓存/" rel="next" title="牛刀小试：Spring Boot整合Redis实现缓存">
+                <i class="fa fa-chevron-left"></i> 牛刀小试：Spring Boot整合Redis实现缓存
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/29/浅谈跨域/" rel="prev" title="浅谈跨域">
+                浅谈跨域 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="SOHUCS"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Hawk" />
+            
+              <p class="site-author-name" itemprop="name">Hawk</p>
+              <p class="site-description motion-element" itemprop="description">Don't ruin a good today by thinking about a bad yesterday.</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/HAWK97" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:wsghawk97@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-globe"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Servlet接口"><span class="nav-number">1.</span> <span class="nav-text">Servlet接口</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ServletConfig接口"><span class="nav-number">2.</span> <span class="nav-text">ServletConfig接口</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#GenericServlet"><span class="nav-number">3.</span> <span class="nav-text">GenericServlet</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#HttpServlet"><span class="nav-number">4.</span> <span class="nav-text">HttpServlet</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Hawk</span>
+
+  
+
+  
+</div>
+<div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+        本站访客数<span id="busuanzi_value_site_uv"></span>人
+</span>
+</div>
+&nbsp&nbsp|&nbsp&nbsp
+<div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_pv">
+	本站总访问量<span id="busuanzi_value_site_pv"></span>次
+</span>
+</div>
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Muse</a> v6.0.1</div>
+
+-->
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+  
+    <script type="text/javascript">
+    (function(){
+      var appid = 'cytBwQz5R';
+      var conf = '45a7b97bccc404fc874e95464b33b9a5';
+      var width = window.innerWidth || document.documentElement.clientWidth;
+      if (width < 960) {
+      window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){
+        window.changyan.api.config({appid:appid,conf:conf})});
+      }
+    })();
+    </script>
+    <script type="text/javascript" src="https://assets.changyan.sohu.com/upload/plugins/plugins.count.js"></script>
+  
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
